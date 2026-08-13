@@ -26,6 +26,13 @@ header{position:sticky;top:0;z-index:10;background:#F8E7E3;padding:18px 20px;bor
 .whatsapp{width:100%;border:0;background:#25D366;color:white;padding:15px;border-radius:15px;font-weight:bold;font-size:16px}
 .table-box{margin-top:20px}.table-box label{display:block;font-weight:bold;margin-bottom:8px}.table-box input{width:100%;padding:14px;border:1px solid #ecd5cf;border-radius:12px;background:white;font-size:16px;outline:none}.table-box input:focus{border-color:#a64635}
 @media(min-width:700px){.products{grid-template-columns:repeat(4,1fr)}}
+.table-alert{ position:fixed;inset:0;background:rgba(51,37,34,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.table-alert.open{display:flex;}
+.table-alert-box{background:#fffaf8;width:100%;max-width:380px;padding:25px;border-radius:24px;text-align:center;box-shadow:0 15px 40px rgba(0,0,0,.25);}
+.table-alert-box .icon{font-size:42px;margin-bottom:10px;}
+.table-alert-box h3{margin:5px 0 10px;font-size:21px;}
+.table-alert-box p{color:#80635d;margin-bottom:20px;}
+.table-alert-box button{width:100%;border:0;background:#332522;color:white;padding:14px;border-radius:14px;font-weight:bold;font-size:16px;}
 </style>
 </head>
 <body>
@@ -63,7 +70,12 @@ header{position:sticky;top:0;z-index:10;background:#F8E7E3;padding:18px 20px;bor
 <div class="table-box"><label for="tableNumber">Numéro de table</label><input type="number" id="tableNumber" placeholder="Entrez le numéro de votre table" min="1"></div>
 <div style="display:flex;justify-content:space-between;margin:20px 0;font-weight:bold"><span>Total</span><span id="cartTotal">0 DA</span></div>
 <button class="whatsapp" onclick="sendWhatsApp()">📲 Commander sur WhatsApp</button></div>
-
+<div class="table-alert" id="tableAlert">
+<div class="table-alert-box">
+<div class="icon">🪑</div><h3>Numéro de table</h3><p>Veuillez entrer le numéro de votre table avant de commander.</p>
+<button onclick="closeTableAlert()"> D'accord</button>
+</div>
+</div>
 <script>
 let cart = JSON.parse(localStorage.getItem("sylyCart")) || {};
 function addProduct(name,price){if(cart[name])cart[name].qty++;else cart[name]={price:price,qty:1};updateCart();}
@@ -77,6 +89,8 @@ localStorage.setItem("sylyCart", JSON.stringify(cart));
 function changeQty(name,change){cart[name].qty+=change;if(cart[name].qty<=0)delete cart[name];updateCart();}
 function openCart(){document.getElementById("cart").classList.add("open");}
 function closeCart(){document.getElementById("cart").classList.remove("open");}
+function closeTableAlert(){document.getElementById("tableAlert").classList.remove("open");document.getElementById("tableNumber").focus();
+}
 function filterProducts(category,button){
 document.querySelectorAll(".categories button").forEach(btn=>btn.classList.remove("active"));button.classList.add("active");
 document.querySelectorAll(".product").forEach(product=>{product.style.display=product.dataset.category===category?"block":"none";});
@@ -84,7 +98,8 @@ document.querySelectorAll(".product").forEach(product=>{product.style.display=pr
 function sendWhatsApp(){
 if(Object.keys(cart).length===0){alert("Veuillez ajouter au moins un produit.");return;}
 const tableNumber=document.getElementById("tableNumber").value.trim();
-if(!tableNumber){alert("Veuillez entrer le numéro de votre table.");document.getElementById("tableNumber").focus();return;}
+if(!tableNumber){document.getElementById("tableAlert").classList.add("open");return;
+}
 let message="Table : "+tableNumber+"\n\n";
 Object.keys(cart).forEach(name=>{message+="• "+cart[name].qty+" × "+name+"\n";});
 window.open("https://wa.me/213781419468?text="+encodeURIComponent(message),"_blank");
